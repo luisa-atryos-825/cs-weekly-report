@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Weekly CS Activities Report — History</title>
+<style>
+  :root{
+    --ink:#1B2A33;
+    --ink-soft:#5B6B74;
+    --line:#E1E7EA;
+    --bg:#F4F7F8;
+    --card:#FFFFFF;
+    --brand:#14678C;
+    --brand-soft:#E7F0F4;
+    --done:#2FAE66; --done-bg:#E7F7EE;
+    --progress:#4C5FD5; --progress-bg:#EAEBFC;
+    --feedback:#DFA300; --feedback-bg:#FDF3DA;
+    --open:#8B98A1; --open-bg:#EEF1F2;
+    --testing:#C2570F; --testing-bg:#FBE9DC;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    background:var(--bg); color:var(--ink); padding:32px 16px;
+  }
+  .wrap{ max-width:840px; margin:0 auto; }
+
+  .picker{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-bottom:14px; flex-wrap:wrap;
+  }
+  .picker .title{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+  select{
+    font-family:inherit; font-size:14px; font-weight:600; color:var(--brand);
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    padding:8px 12px; cursor:pointer;
+  }
+
+  .sheet{
+    background:var(--card); border-radius:14px; border:1px solid var(--line);
+    overflow:hidden; box-shadow:0 1px 3px rgba(20,103,140,0.06);
+  }
+  .header{ background:var(--brand); color:#fff; padding:28px 32px; }
+  .header .eyebrow{
+    font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+    opacity:.8; margin:0 0 6px;
+  }
+  .header h1{ margin:0; font-size:22px; font-weight:600; }
+  .header .range{ margin-top:4px; font-size:14px; opacity:.9; }
+
+  .stats{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--line); border-bottom:1px solid var(--line);
+  }
+  .stat{ background:var(--card); padding:18px 20px; }
+  .stat .label{
+    font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink-soft); margin:0 0 6px;
+  }
+  .stat .value{ font-size:20px; font-weight:700; color:var(--ink); }
+  .stat .sub{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
+  .body{ padding:8px 32px 28px; }
+
+  .shop-block{ margin-top:24px; }
+  .shop-title{
+    display:flex; align-items:center; gap:8px;
+    font-size:13px; font-weight:700; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--brand); margin-bottom:8px;
+  }
+  .shop-title .count{
+    font-weight:500; color:var(--ink-soft); text-transform:none; letter-spacing:0;
+  }
+
+  table{ width:100%; border-collapse:collapse; font-size:14px; }
+  th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-soft); padding:6px 10px; border-bottom:1px solid var(--line);
+  }
+  th.num, td.num{ text-align:right; }
+  td{ padding:10px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+
+  .task a{
+    color:var(--ink); text-decoration:none; font-weight:500;
+    border-bottom:1px solid var(--brand);
+  }
+  .task a:hover{ color:var(--brand); }
+  .task .plain{ color:var(--ink); font-weight:500; }
+  .who{ display:block; margin-top:3px; font-size:11px; color:var(--ink-soft); font-weight:500; }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600;
+    padding:3px 8px; border-radius:999px; white-space:nowrap; margin-top:5px;
+  }
+  .badge.done{ background:var(--done-bg); color:var(--done); }
+  .badge.progress{ background:var(--progress-bg); color:var(--progress); }
+  .badge.feedback{ background:var(--feedback-bg); color:var(--feedback); }
+  .badge.open{ background:var(--open-bg); color:var(--open); }
+  .badge.testing{ background:var(--testing-bg); color:var(--testing); }
+  .badge .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+  .totals{
+    margin-top:26px; padding-top:18px; border-top:2px solid var(--ink);
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .totals .label{ font-size:14px; font-weight:700; }
+  .totals .value{ font-size:20px; font-weight:800; color:var(--brand); }
+
+  .footer{
+    padding:14px 32px 22px; font-size:11px; color:var(--ink-soft);
+    border-top:1px solid var(--line); background:#FAFCFD;
+  }
+
+  .empty{ padding:40px 32px; text-align:center; color:var(--ink-soft); font-size:14px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="picker">
+    <span class="title">Week</span>
+    <select id="weekSelect"></select>
+  </div>
+  <div class="sheet" id="report"></div>
+</div>
+
+<script>
+// ---- Embedded verified weekly data. New weeks get appended here each Monday. ----
+const WEEKS = {
+  "2026-06-29": {
+    range: "Monday, June 29 – Sunday, July 5, 2026",
+    stats: {
+      totalHours: "31 hrs",
+      totalHoursSub: "16 hrs forecasted",
+      mailbox: "2,781",
+      mailboxSub: "3,907 incl. Sat & Sun",
+      shopsCount: 1,
+      shopsList: "All Shops"
+    },
+    shops: [
+      { name: "All Shops", hours: "31", tasks: [
+        { title: "Phase 1 — Update CMS company info for new Stripe accounts (Switch-now sites)", link: "https://app.clickup.com/t/86ey2rxbu", who: "Maynne", status: "done", date: "Jun 29–30", hrs: "8.5" },
+        { title: "Phase 1 — Update CMS company info for new Stripe accounts (Switch-now sites)", link: "https://app.clickup.com/t/86ey2rxbu", who: "Avie", status: "done", date: "Jun 29–Jul 3", hrs: "22.5" }
+      ]}
+    ],
+    footer: "Sources: New Main file tab (mailbox count, total CS extra hours) · Maynne & Avie tabs (Khristia had not started logging yet this week) · ClickUp (task name + status, pulled live). Both entries this week traced to the same ClickUp task, the Stripe account migration — logged separately per person."
+  },
+  "2026-07-06": {
+    range: "Monday, July 6 – Sunday, July 12, 2026",
+    stats: {
+      totalHours: "17 hrs",
+      totalHoursSub: "17 hrs forecasted",
+      mailbox: "2,455",
+      mailboxSub: "3,468 incl. Sat & Sun",
+      shopsCount: 5,
+      shopsList: "NE · DG · URN · CM · All Shops"
+    },
+    shops: [
+      { name: "NE", hours: "4.5", tasks: [
+        { title: "Add \"User Reviews\" on Sites", link: "https://app.clickup.com/t/86entyzn2", who: "Maynne", status: "done", date: "Jul 6, 8", hrs: "1.5" },
+        { title: "[Contact Categories] NE — Pilot", link: "https://app.clickup.com/t/86ey293xh", who: "Maynne", status: "done", date: "Jul 7, 10", hrs: "2.5" },
+        { title: "[Contact Categories] NE — Pilot", link: "https://app.clickup.com/t/86ey293xh", who: "Avie", status: "done", date: "Jul 10", hrs: "0.5" }
+      ]},
+      { name: "DG", hours: "1", tasks: [
+        { title: "Error: \"Your account cannot currently make live charges\"", link: "https://app.clickup.com/t/86ey6hnjz", who: "Maynne", status: "done", date: "Jul 7", hrs: "1" }
+      ]},
+      { name: "URN", hours: "5.25", tasks: [
+        { title: "Upgrade Engraving Quality - For picture to drawing products", link: "https://app.clickup.com/t/86ey2r634", who: "Avie", status: "testing", date: "Jul 6–7", hrs: "3.75" },
+        { title: "URN Image Validation Filters with Automated Customer Notifications", link: "https://app.clickup.com/t/86exxuuv0", who: "Avie", status: "done", date: "Jul 9–10", hrs: "1.5" }
+      ]},
+      { name: "CM", hours: "3.25", tasks: [
+        { title: "Cat blog integration", link: null, who: "Avie", status: null, date: "Jul 6–8", hrs: "3.25" }
+      ]},
+      { name: "All Shops", hours: "3", tasks: [
+        { title: "Extend \"Exclude\" button to accessories + fix related issues", link: "https://app.clickup.com/t/86ey77157", who: "Maynne", status: "open", date: "Jul 8", hrs: "2.5" },
+        { title: "GDPR dropdown not working (PP CM CT MA NE)", link: "https://app.clickup.com/t/86ey822mx", who: "Maynne", status: "done", date: "Jul 10", hrs: "0.5" }
+      ]}
+    ],
+    footer: "Sources: New Main file tab (mailbox count, total CS extra hours) · Maynne & Avie tabs (Khristia had not started logging yet this week) · ClickUp (task name + status, pulled live). Note: New Main file records this week's total as 18 hrs; the itemized task log traces to 17 hrs — a small (1 hr) discrepancy in the source sheet, flagged for visibility rather than smoothed over. \"Cat blog integration\" had no ClickUp link in the sheet, so no status is shown."
+  },
+  "2026-07-13": {
+    range: "Monday, July 13 – Sunday, July 19, 2026",
+    stats: {
+      totalHours: "37 hrs",
+      totalHoursSub: "34 task hrs + 3 VA hrs",
+      mailbox: "2,405",
+      mailboxSub: "3,368 incl. Sat & Sun",
+      shopsCount: 4,
+      shopsList: "NE · URN · CM · All Shops"
+    },
+    shops: [
+      { name: "NE", hours: "2.5", tasks: [
+        { title: "[Contact Categories] NE — Pilot + Contact form — email subject per category (dev task)", link: "https://app.clickup.com/t/86ey293xh", who: "Maynne", status: "done", date: "Jul 13", hrs: "2.5" }
+      ]},
+      { name: "URN", hours: "21", tasks: [
+        { title: "[Contact Categories] URN", link: "https://app.clickup.com/t/86ey293yj", who: "Maynne", status: "done", date: "Jul 14–16", hrs: "12.5" },
+        { title: "URN Image Validation Filters with Automated Customer Notifications", link: "https://app.clickup.com/t/86exxuuv0", who: "Maynne", status: "done", date: "Jul 16", hrs: "0.25" },
+        { title: "URN Image Validation Filters with Automated Customer Notifications", link: "https://app.clickup.com/t/86exxuuv0", who: "Avie", status: "done", date: "Jul 13–16", hrs: "8.25" }
+      ]},
+      { name: "CM", hours: "2.5", tasks: [
+        { title: "July Blog", link: "https://app.clickup.com/t/86ey84dk5", who: "Avie", status: "done", date: "Jul 14–15", hrs: "2.5" }
+      ]},
+      { name: "All Shops", hours: "11", tasks: [
+        { title: "Automated Email Templates for Photo Issues", link: "https://app.clickup.com/t/86ey94muc", who: "Khristia", status: "progress", date: "Jul 13–16", hrs: "8" },
+        { title: "VA task", link: null, who: null, status: null, date: "Jul 13–19", hrs: "3" }
+      ]}
+    ],
+    footer: "Sources: New Main file tab (mailbox count, total CS extra hours) · Maynne, Avie & Khristia tabs (tasks, dates, time spent) · ClickUp (task name + status, pulled live). Several entries logged in the sheet as \"URN + NE\" or \"PP\" actually link to the same ClickUp task, \"[Contact Categories] URN\" — grouped here under its real shop."
+  },
+  "2026-07-20": {
+    range: "Monday, July 20 – Sunday, July 26, 2026",
+    stats: {
+      totalHours: "43 hrs",
+      totalHoursSub: "33.5 task hrs + 9.5 VA hrs",
+      mailbox: "2,511",
+      mailboxSub: "3,568 incl. Sat & Sun",
+      shopsCount: 5,
+      shopsList: "DG · URN · CM · PP · All Shops"
+    },
+    shops: [
+      { name: "DG", hours: "7", tasks: [
+        { title: "DG Update Cookie Consent Banner Provider Domain", link: "https://app.clickup.com/t/86exanknh", who: "Maynne", status: "done", date: "Jul 20–21", hrs: "3.5" },
+        { title: "[Contact Categories] DG", link: "https://app.clickup.com/t/86ey29435", who: "Maynne", status: "feedback", date: "Jul 22", hrs: "3.5" }
+      ]},
+      { name: "URN", hours: "12", tasks: [
+        { title: "[Contact Categories] URN", link: "https://app.clickup.com/t/86ey293yj", who: "Maynne", status: "done", date: "Jul 20–21", hrs: "3" },
+        { title: "URN Image Validation Filters with Automated Customer Notifications", link: "https://app.clickup.com/t/86exxuuv0", who: "Avie", status: "done", date: "Jul 20–22", hrs: "6.5" },
+        { title: "Cat URN Collect Unique Reviews", link: "https://app.clickup.com/t/86eyajmb1", who: "Avie", status: "open", date: "Jul 23", hrs: "2.5" }
+      ]},
+      { name: "CM", hours: "4", tasks: [
+        { title: "[Contact Categories] CM — Final", link: "https://app.clickup.com/t/86ey29459", who: "Maynne", status: "progress", date: "Jul 23", hrs: "4" }
+      ]},
+      { name: "PP", hours: "2", tasks: [
+        { title: "July PP Blog", link: "https://app.clickup.com/t/86eya23u6", who: "Avie", status: "done", date: "Jul 20", hrs: "2" }
+      ]},
+      { name: "All Shops", hours: "18", tasks: [
+        { title: "Automated Email Templates for Photo Issues", link: "https://app.clickup.com/t/86ey94muc", who: "Khristia", status: "progress", date: "Jul 20–23", hrs: "8.5" },
+        { title: "VA task", link: null, who: null, status: null, date: "Jul 21–24", hrs: "9.5" }
+      ]}
+    ],
+    footer: "Sources: New Main file tab (mailbox count, total CS extra hours) · Maynne, Avie & Khristia tabs (tasks, dates, time spent) · ClickUp (task name + status, pulled live). Note: two entries logged in the sheet as \"CT\" actually link to ClickUp tasks tagged DG and URN respectively — grouped here under their real shop."
+  }
+};
+
+const STATUS_LABELS = {
+  done: "Done",
+  progress: "In progress",
+  feedback: "Needs feedback",
+  open: "Not started",
+  testing: "Testing on live"
+};
+
+function badgeHtml(status){
+  if(!status) return "";
+  const label = STATUS_LABELS[status] || status;
+  return `<span class="badge ${status}"><span class="dot"></span>${label}</span>`;
+}
+
+function taskRowHtml(t){
+  const titleHtml = t.link
+    ? `<a href="${t.link}">${t.title}</a>`
+    : `<span class="plain">${t.title}</span>`;
+  const whoHtml = t.who ? `<span class="who">${t.who}</span>` : "";
+  return `
+    <tr>
+      <td class="task">${titleHtml}${whoHtml}${badgeHtml(t.status)}</td>
+      <td>${t.date}</td>
+      <td class="num">${t.hrs}</td>
+    </tr>`;
+}
+
+function shopBlockHtml(shop){
+  return `
+    <div class="shop-block">
+      <div class="shop-title">${shop.name} <span class="count">— ${shop.hours} hrs</span></div>
+      <table>
+        <tr><th>Task</th><th>Date</th><th class="num">Hrs</th></tr>
+        ${shop.tasks.map(taskRowHtml).join("")}
+      </table>
+    </div>`;
+}
+
+function renderWeek(key){
+  const w = WEEKS[key];
+  const el = document.getElementById('report');
+  if(!w){
+    el.innerHTML = `<div class="empty">No data for this week yet.</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="header">
+      <p class="eyebrow">Atryos DMCC · CS Activities Report</p>
+      <h1>Weekly CS Activities — Marketing Task Time Log</h1>
+      <p class="range">${w.range}</p>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <p class="label">Total hours logged</p>
+        <p class="value">${w.stats.totalHours}</p>
+        <p class="sub">${w.stats.totalHoursSub}</p>
+      </div>
+      <div class="stat">
+        <p class="label">Mailbox count</p>
+        <p class="value">${w.stats.mailbox}</p>
+        <p class="sub">${w.stats.mailboxSub}</p>
+      </div>
+      <div class="stat">
+        <p class="label">Shops covered</p>
+        <p class="value">${w.stats.shopsCount}</p>
+        <p class="sub">${w.stats.shopsList}</p>
+      </div>
+    </div>
+    <div class="body">
+      ${w.shops.map(shopBlockHtml).join("")}
+      <div class="totals">
+        <span class="label">Total hours this week</span>
+        <span class="value">${w.stats.totalHours}</span>
+      </div>
+    </div>
+    <div class="footer">${w.footer}</div>
+  `;
+}
+
+function labelForKey(key){
+  return WEEKS[key] ? WEEKS[key].range.replace("Monday, ", "").replace(/Sunday, [A-Za-z]+ /, "– ") : key;
+}
+
+async function init(){
+  // Sync embedded weeks into shared storage so anyone opening this artifact sees the same history.
+  for(const key of Object.keys(WEEKS)){
+    try{
+      await window.storage.set(`week:${key}`, JSON.stringify(WEEKS[key]), true);
+    }catch(e){ /* non-fatal */ }
+  }
+
+  // Pull in any additional weeks that exist in shared storage but aren't hardcoded above yet.
+  try{
+    const listed = await window.storage.list('week:', true);
+    if(listed && listed.keys){
+      for(const k of listed.keys){
+        const shortKey = k.replace('week:', '');
+        if(!WEEKS[shortKey]){
+          try{
+            const res = await window.storage.get(k, true);
+            if(res && res.value){ WEEKS[shortKey] = JSON.parse(res.value); }
+          }catch(e){ /* skip */ }
+        }
+      }
+    }
+  }catch(e){ /* non-fatal */ }
+
+  const keys = Object.keys(WEEKS).sort().reverse();
+  const select = document.getElementById('weekSelect');
+  select.innerHTML = keys.map(k => `<option value="${k}">${labelForKey(k)}</option>`).join("");
+  select.addEventListener('change', (e) => renderWeek(e.target.value));
+
+  renderWeek(keys[0]);
+}
+
+init();
+</script>
+
+</body>
+</html>
