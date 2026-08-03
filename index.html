@@ -129,6 +129,43 @@
 <script>
 // ---- Embedded verified weekly data. New weeks get appended here each Monday. ----
 const WEEKS = {
+  "2026-07-27": {
+    range: "Monday, July 27 – Sunday, August 2, 2026",
+    stats: {
+      totalHours: "24 hrs",
+      totalHoursSub: "19 task hrs + 5 VA hrs",
+      mailbox: "2,462",
+      mailboxSub: "3,542 incl. Sat & Sun",
+      shopsCount: 6,
+      shopsList: "CM · CT · NE · PP · URN · All Shops"
+    },
+    shops: [
+      { name: "CM", hours: "10.5", tasks: [
+        { title: "New UI/UX: Deep DEV QA — Desktop & Mobile (All Markets)", link: "https://app.clickup.com/t/86eycky28", who: "Maynne", status: "done", date: "Jul 27", hrs: "2.5" },
+        { title: "New UI/UX: Deep DEV QA — Desktop & Mobile (All Markets)", link: "https://app.clickup.com/t/86eycky28", who: "Avie", status: "done", date: "Jul 27", hrs: "3.5" },
+        { title: "[Contact Categories] CM — Final", link: "https://app.clickup.com/t/86ey29459", who: "Maynne", status: "done", date: "Jul 28", hrs: "2" },
+        { title: "New UI/UX: Deep LIVE QA — Desktop & Mobile (All Markets)", link: "https://app.clickup.com/t/86eyex905", who: "Maynne", status: "done", date: "Jul 29", hrs: "1.25" },
+        { title: "New UI/UX: Deep LIVE QA — Desktop & Mobile (All Markets)", link: "https://app.clickup.com/t/86eyex905", who: "Avie", status: "done", date: "Jul 29", hrs: "1.25" }
+      ]},
+      { name: "CT", hours: "2.5", tasks: [
+        { title: "July Blog", link: "https://app.clickup.com/t/86eycgv48", who: "Avie", status: "done", date: "Jul 28", hrs: "2.5" }
+      ]},
+      { name: "NE", hours: "1.75", tasks: [
+        { title: "Contact form dropdown — apply ID-sort override", link: "https://app.clickup.com/t/86eye2kcp", who: "Maynne", status: "done", date: "Jul 29–30", hrs: "1.75" }
+      ]},
+      { name: "PP", hours: "2.25", tasks: [
+        { title: "New Image Validation Filters with Automated Customer Notifications — PP", link: "https://app.clickup.com/t/86eycn7ea", who: "Avie", status: "testing_dev", date: "Jul 28–29", hrs: "2.25" }
+      ]},
+      { name: "URN", hours: "1", tasks: [
+        { title: "Upgrade Engraving Quality - For picture to drawing products", link: "https://app.clickup.com/t/86ey2r634", who: "Avie", status: "testing", date: "Jul 29", hrs: "1" }
+      ]},
+      { name: "All Shops", hours: "6", tasks: [
+        { title: "Create Shipping QC Guide — Hungary Production Team", link: "https://app.clickup.com/t/86eyeh9q0", who: "Maynne", status: "progress", date: "Jul 28", hrs: "1" },
+        { title: "VA task", link: null, who: null, status: null, date: "Jul 27–30", hrs: "5" }
+      ]}
+    ],
+    footer: "Sources: New Main file tab (mailbox count, total CS extra hours) · Maynne & Avie tabs (Khristia had no entries this week) · ClickUp (task name + status, pulled live). Note: the sheet had a duplicate, mostly-blank Jul 27–Aug 2 row block further down (likely a copy/paste leftover) — ignored in favor of the fully-populated one. Avie's Jul 29 combined log entry (\"Engraving Quality // PP Image Validation - Testing\") was split across its two real ClickUp tasks (URN + PP) rather than left under one link, since the hours clearly named both."
+  },
   "2026-06-29": {
     range: "Monday, June 29 – Sunday, July 5, 2026",
     stats: {
@@ -249,13 +286,15 @@ const STATUS_LABELS = {
   progress: "In progress",
   feedback: "Needs feedback",
   open: "Not started",
-  testing: "Testing on live"
+  testing: "Testing on live",
+  testing_dev: "Testing on dev"
 };
 
 function badgeHtml(status){
   if(!status) return "";
   const label = STATUS_LABELS[status] || status;
-  return `<span class="badge ${status}"><span class="dot"></span>${label}</span>`;
+  const cssClass = status.startsWith("testing") ? "testing" : status;
+  return `<span class="badge ${cssClass}"><span class="dot"></span>${label}</span>`;
 }
 
 function taskRowHtml(t){
