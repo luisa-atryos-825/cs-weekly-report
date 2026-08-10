@@ -17,6 +17,8 @@
     --feedback:#DFA300; --feedback-bg:#FDF3DA;
     --open:#8B98A1; --open-bg:#EEF1F2;
     --testing:#C2570F; --testing-bg:#FBE9DC;
+    --complete:#1E9E7A; --complete-bg:#E1F5EF;
+    --onhold:#2FA6A0; --onhold-bg:#E3F6F5;
   }
   *{box-sizing:border-box;}
   body{
@@ -99,6 +101,8 @@
   .badge.feedback{ background:var(--feedback-bg); color:var(--feedback); }
   .badge.open{ background:var(--open-bg); color:var(--open); }
   .badge.testing{ background:var(--testing-bg); color:var(--testing); }
+  .badge.complete_bugs{ background:var(--complete-bg); color:var(--complete); }
+  .badge.on_hold{ background:var(--onhold-bg); color:var(--onhold); }
   .badge .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
 
   .totals{
@@ -129,6 +133,32 @@
 <script>
 // ---- Embedded verified weekly data. New weeks get appended here each Monday. ----
 const WEEKS = {
+  "2026-08-03": {
+    range: "Monday, August 3 – Sunday, August 9, 2026",
+    stats: {
+      totalHours: "12 hrs",
+      totalHoursSub: "10.5 task hrs + 1.5 VA hrs",
+      mailbox: "2,752",
+      mailboxSub: "4,130 incl. Sat & Sun",
+      shopsCount: 2,
+      shopsList: "CM · All Shops"
+    },
+    shops: [
+      { name: "CM", hours: "10.5", tasks: [
+        { title: "Review Ratings Displayed Incorrectly Across CM Shops", link: "https://app.clickup.com/t/86eyfuja1", who: "Maynne", status: "complete_bugs", date: "Aug 3–6", hrs: "7" },
+        { title: "Review Ratings Displayed Incorrectly Across CM Shops", link: "https://app.clickup.com/t/86eyfuja1", who: "Khristia", status: "complete_bugs", date: "Aug 5–6", hrs: "1.5" },
+        { parts: [
+            { title: "Unable to post product reviews across storefronts (error on submit)", link: "https://app.clickup.com/t/86eyh40ew", status: "done" },
+            { title: "Reviews page shows no reviews despite existing data — BE-FR, AT", link: "https://app.clickup.com/t/86eyh3m0c", status: "on_hold" }
+          ], who: "Maynne", date: "Aug 4–5", hrs: "1" },
+        { title: "UI Improvements & Post-Push Review", link: "https://app.clickup.com/t/86eyfq2cz", who: "Maynne", status: "done", date: "Aug 5", hrs: "1" }
+      ]},
+      { name: "All Shops", hours: "1.5", tasks: [
+        { title: "VA task", link: null, who: null, status: null, date: "Aug 3", hrs: "1.5" }
+      ]}
+    ],
+    footer: "Sources: New Main file tab (mailbox count, total CS extra hours) · Maynne & Khristia tabs (Avie had no entries this week) · ClickUp (task name + status, pulled live). One Maynne log entry combined two different bugs under a single time entry (\"BUGS: Unable to post product reviews // BE-FR reviews page shows no reviews\") — since they trace to two separate ClickUp tasks with two different statuses (Closed vs. On hold), both are shown rather than picking one. A same-day remark noted an extra 1 hr against the ratings task on Aug 5 that wasn't in either task slot that day — folded into its total. Two new ClickUp statuses appeared this week (\"complete - bugs reported\" and \"on hold\") and got their own badge styles."
+  },
   "2026-07-27": {
     range: "Monday, July 27 – Sunday, August 2, 2026",
     stats: {
@@ -287,7 +317,9 @@ const STATUS_LABELS = {
   feedback: "Needs feedback",
   open: "Not started",
   testing: "Testing on live",
-  testing_dev: "Testing on dev"
+  testing_dev: "Testing on dev",
+  complete_bugs: "Complete – bugs reported",
+  on_hold: "On hold"
 };
 
 function badgeHtml(status){
@@ -298,13 +330,20 @@ function badgeHtml(status){
 }
 
 function taskRowHtml(t){
-  const titleHtml = t.link
-    ? `<a href="${t.link}">${t.title}</a>`
-    : `<span class="plain">${t.title}</span>`;
+  let titleHtml;
+  if(t.parts){
+    titleHtml = t.parts.map(p =>
+      `<div>${p.link ? `<a href="${p.link}">${p.title}</a>` : `<span class="plain">${p.title}</span>`}${badgeHtml(p.status)}</div>`
+    ).join("");
+  } else {
+    titleHtml = t.link
+      ? `<a href="${t.link}">${t.title}</a>${badgeHtml(t.status)}`
+      : `<span class="plain">${t.title}</span>${badgeHtml(t.status)}`;
+  }
   const whoHtml = t.who ? `<span class="who">${t.who}</span>` : "";
   return `
     <tr>
-      <td class="task">${titleHtml}${whoHtml}${badgeHtml(t.status)}</td>
+      <td class="task">${titleHtml}${whoHtml}</td>
       <td>${t.date}</td>
       <td class="num">${t.hrs}</td>
     </tr>`;
